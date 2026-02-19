@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>予算ドラフト | SNS運用事業 × Web制作事業 | 株式会社Opus.net</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+
+    :root {
+      --primary: #1a365d;
+      --primary-light: #2b6cb0;
+      --accent: #ed8936;
+      --accent-light: #fbd38d;
+      --bg: #ffffff;
+      --bg-sub: #f7fafc;
+      --text: #1a202c;
+      --text-sub: #4a5568;
+      --border: #e2e8f0;
+      --success: #38a169;
+      --warning: #d69e2e;
+      --danger: #e53e3e;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      color: var(--text);
+      line-height: 1.8;
+      font-size: 14px;
+      background: var(--bg);
+    }
+
+    @media print {
+      body { font-size: 11px; line-height: 1.6; }
+      .cover { page-break-after: always; min-height: 100vh; }
+      .section { page-break-inside: avoid; }
+      .page-break { page-break-before: always; }
+      table { font-size: 10px; }
+      .sidebar { display: none; }
+      .layout { display: block; }
+      .content { padding: 40px 20px; }
+    }
+
+    .cover {
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      min-height: 50vh;
+      background: linear-gradient(135deg, var(--primary) 0%, #1e4e8c 50%, var(--primary-light) 100%);
+      color: #fff; text-align: center; padding: 40px 40px;
+    }
+    .cover-label { font-size: 13px; letter-spacing: 6px; text-transform: uppercase; opacity: 0.7; margin-bottom: 24px; }
+    .cover h1 { font-size: 38px; font-weight: 700; margin-bottom: 8px; letter-spacing: 2px; }
+    .cover-sub { font-size: 18px; font-weight: 300; opacity: 0.85; margin-bottom: 48px; }
+    .cover-line { width: 60px; height: 3px; background: var(--accent); margin: 32px auto; }
+    .cover-meta { font-size: 13px; opacity: 0.6; line-height: 2; }
+    .cover-badge { display: inline-block; background: rgba(237,137,54,0.2); border: 1px solid rgba(237,137,54,0.5); color: var(--accent-light); padding: 4px 16px; border-radius: 20px; font-size: 12px; letter-spacing: 2px; margin-bottom: 32px; }
+
+    html { scroll-behavior: smooth; }
+    .layout { display: flex; max-width: 1200px; margin: 0 auto; }
+    .sidebar { width: 260px; flex-shrink: 0; padding: 32px 20px; border-right: 1px solid var(--border); position: sticky; top: 0; height: 100vh; overflow-y: auto; background: var(--bg-sub); }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .content { flex: 1; min-width: 0; padding: 60px 40px; }
+
+    .section { margin-bottom: 56px; }
+    .section-number { display: inline-flex; align-items: center; justify-content: center; background: var(--primary); color: #fff; font-size: 12px; font-weight: 700; width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; }
+    h2.section-title { font-size: 22px; color: var(--primary); margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); display: flex; align-items: center; gap: 10px; }
+    h3 { font-size: 16px; color: var(--primary-light); margin: 28px 0 12px; padding-left: 12px; border-left: 3px solid var(--accent); }
+    h4 { font-size: 14px; color: var(--text); font-weight: 700; margin: 16px 0 8px; }
+
+    table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 13px; }
+    thead th { background: var(--primary); color: #fff; font-weight: 500; padding: 10px 12px; text-align: left; font-size: 12px; white-space: nowrap; }
+    thead th.right { text-align: right; }
+    tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    tbody td.right { text-align: right; font-variant-numeric: tabular-nums; }
+    tbody td.bold { font-weight: 700; }
+    tbody tr:nth-child(even) { background: var(--bg-sub); }
+    tbody tr.total-row { background: #edf2f7 !important; font-weight: 700; border-top: 2px solid var(--primary); }
+    tbody tr.subtotal-row { background: #f0f4f8 !important; font-weight: 600; }
+
+    .highlight-box { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-left: 4px solid var(--accent); padding: 16px 20px; margin: 16px 0; border-radius: 0 8px 8px 0; }
+    .highlight-box p { margin: 4px 0; font-size: 13px; }
+    .info-box { background: #ebf8ff; border-left: 4px solid var(--primary-light); padding: 16px 20px; margin: 16px 0; border-radius: 0 8px 8px 0; }
+    .info-box p { margin: 4px 0; font-size: 13px; }
+    .caution-box { background: #fff5f5; border-left: 4px solid var(--danger); padding: 16px 20px; margin: 16px 0; border-radius: 0 8px 8px 0; }
+    .caution-box p { margin: 4px 0; font-size: 13px; }
+
+    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 20px 0; }
+    .summary-card { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+    .summary-card.accent { border-color: var(--accent); background: linear-gradient(135deg, #fffbeb 0%, #fff 100%); }
+    .summary-card .label { font-size: 12px; color: var(--text-sub); margin-bottom: 4px; }
+    .summary-card .value { font-size: 28px; font-weight: 700; color: var(--primary); }
+    .summary-card .unit { font-size: 12px; color: var(--text-sub); }
+    .summary-card .note { font-size: 11px; color: var(--text-sub); margin-top: 4px; }
+
+    .scenario-label { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; margin-right: 6px; }
+    .scenario-conservative { background: #c6f6d5; color: #276749; }
+    .scenario-standard { background: #bee3f8; color: #2a4365; }
+    .scenario-aggressive { background: #fed7d7; color: #9b2c2c; }
+
+    .timeline { position: relative; margin: 24px 0; padding-left: 32px; }
+    .timeline::before { content: ""; position: absolute; left: 10px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+    .timeline-item { position: relative; margin-bottom: 24px; padding: 16px 20px; background: var(--bg-sub); border: 1px solid var(--border); border-radius: 8px; }
+    .timeline-item::before { content: ""; position: absolute; left: -28px; top: 20px; width: 12px; height: 12px; background: var(--primary); border-radius: 50%; border: 2px solid #fff; }
+    .timeline-item.milestone::before { background: var(--accent); width: 14px; height: 14px; left: -29px; }
+    .timeline-period { font-size: 12px; color: var(--accent); font-weight: 700; margin-bottom: 4px; }
+    .timeline-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+    .timeline-item ul { padding-left: 20px; font-size: 13px; }
+    .timeline-item li { margin: 3px 0; }
+
+    ul, ol { padding-left: 24px; margin: 8px 0; }
+    li { margin: 4px 0; font-size: 13px; }
+    p { margin: 8px 0; font-size: 14px; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+    .doc-footer { text-align: center; padding: 40px; color: var(--text-sub); font-size: 12px; border-top: 1px solid var(--border); margin-top: 60px; }
+    .text-sub { color: var(--text-sub); font-size: 13px; }
+
+    .toc h2 { font-size: 13px; color: var(--text-sub); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); letter-spacing: 2px; font-weight: 500; }
+    .toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+    .toc li { counter-increment: toc; }
+    .toc li a { display: flex; align-items: baseline; gap: 8px; padding: 7px 10px; margin: 1px 0; border-radius: 6px; color: var(--text-sub); text-decoration: none; font-size: 12.5px; transition: all 0.15s; line-height: 1.5; }
+    .toc li a:hover { color: var(--primary); background: rgba(26,54,93,0.06); }
+    .toc li a.active { color: var(--primary); background: rgba(43,108,176,0.1); font-weight: 600; }
+    .toc li a::before { content: counter(toc, decimal-leading-zero); font-size: 11px; font-weight: 700; color: var(--primary-light); min-width: 18px; opacity: 0.5; }
+    .toc li a.active::before { opacity: 1; color: var(--primary); }
+  </style>
+</head>
+<body>
+
+<!-- ========== COVER ========== -->
+<div class="cover">
+  <p class="cover-label">Budget Draft</p>
+  <h1>予算ドラフト</h1>
+  <p class="cover-sub">SNS運用事業 × Web制作事業</p>
+  <div class="cover-badge">DRAFT — 調整前</div>
+  <div class="cover-line"></div>
+  <div class="cover-meta">
+    <p>株式会社Opus.net</p>
+    <p>2026年2月19日 作成</p>
+    <p>作成: 上田 琉</p>
+  </div>
+</div>
+
+<!-- ========== LAYOUT ========== -->
+<div class="layout">
+
+<!-- Sidebar TOC -->
+<aside class="sidebar">
+  <nav class="toc">
+    <h2>目次</h2>
+    <ol>
+      <li><a href="#sec1">サマリー</a></li>
+      <li><a href="#sec2">事業概要</a></li>
+      <li><a href="#sec3">工数・営業設計</a></li>
+      <li><a href="#sec4">SNS 売上シミュレーション</a></li>
+      <li><a href="#sec5">Web制作 売上シミュレーション</a></li>
+      <li><a href="#sec6">合算売上（3年間）</a></li>
+      <li><a href="#sec7">コスト構造</a></li>
+      <li><a href="#sec8">必要人員とタイミング</a></li>
+      <li><a href="#sec9">損益イメージ</a></li>
+      <li><a href="#sec10">初期3ヶ月の実行計画</a></li>
+      <li><a href="#sec11">成長ロードマップ</a></li>
+      <li><a href="#sec12">AI活用方針</a></li>
+      <li><a href="#sec13">リスクと対策</a></li>
+      <li><a href="#sec14">次のアウトプット</a></li>
+      <li><a href="#sec15">まとめ</a></li>
+    </ol>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<div class="content">
+
+  <!-- ===== 1. サマリー ===== -->
+  <div class="section" id="sec1">
+    <h2 class="section-title"><span class="section-number">1</span>サマリー</h2>
+
+    <p>SNS運用事業とWeb制作事業の<strong>2〜3年間の売上見通し・必要人員・投資計画</strong>をまとめたドラフト。</p>
+
+    <h3>基本方針</h3>
+    <ul>
+      <li><strong>Web制作で入り込む → MEO → SNS運用</strong> の段階的アップセル</li>
+      <li>SNS事業は2〜3年かけて正しく成長させる（無理に急がない）</li>
+      <li>整骨院4,000院・整備工場ネットワークを最大限活用</li>
+      <li>夜職で培ったSNSノウハウを<strong>パーソナルジム → 高単価飲食 → 美容クリニック</strong>へ横展開</li>
+      <li>最終目標：来店型ビジネスの<strong>「外部マーケティング部」</strong>のポジション確立</li>
+    </ul>
+
+    <h3>FY2026（初年度）標準シナリオのサマリー</h3>
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="label">SNS事業 年間売上</div>
+        <div class="value">1,360<span class="unit">万円</span></div>
+        <div class="note">年度末MRR 185万/月</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">Web制作事業 年間売上</div>
+        <div class="value">717<span class="unit">万円</span></div>
+        <div class="note">制作405万 + 保守312万</div>
+      </div>
+      <div class="summary-card accent">
+        <div class="label">合計 年間売上</div>
+        <div class="value">2,077<span class="unit">万円</span></div>
+        <div class="note">年度末 月商239万</div>
+      </div>
+    </div>
+
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="label">FY2026 追加コスト</div>
+        <div class="value" style="font-size: 24px;">328<span class="unit">万円</span></div>
+        <div class="note">ツール52万+広告30万+経費36万+人員210万</div>
+      </div>
+      <div class="summary-card accent">
+        <div class="label">FY2026 粗利</div>
+        <div class="value" style="font-size: 24px;">1,749<span class="unit">万円</span></div>
+        <div class="note">売上2,077万 − 追加コスト328万</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">FY2028 粗利</div>
+        <div class="value" style="font-size: 24px;">4,255<span class="unit">万円</span></div>
+        <div class="note">売上5,500万 − 追加コスト1,245万</div>
+      </div>
+    </div>
+    <p class="text-sub">※粗利＝売上−追加コスト。既存人件費（上田・栗原さん）は含まず。松本さんにて加算してください。</p>
+
+    <div class="highlight-box">
+      <p><strong>2年目（FY2027）標準で年間3,900万円、3年目（FY2028）で5,500万円を見込む。</strong></p>
+      <p>Web制作の保守収入（月額1万×件数）がストック型で積み上がるのが強み。</p>
+    </div>
+  </div>
+
+  <!-- ===== 2. 事業概要 ===== -->
+  <div class="section page-break" id="sec2">
+    <h2 class="section-title"><span class="section-number">2</span>事業概要</h2>
+
+    <h3>SNS運用事業</h3>
+    <p>クライアント企業のSNS戦略立案・運用代行・インハウス化支援事業。<br>
+    <strong>メインSNS:</strong> TikTok中心。Instagram・YouTubeも対応。<br>
+    <strong>現在のメインターゲット:</strong> 夜職（バー/コンカフェ）。今後パーソナルジム・高単価飲食・美容クリニックへ横展開予定。</p>
+
+    <h4>SNS運用 料金プラン（月額固定）</h4>
+    <table>
+      <thead><tr><th>プラン</th><th class="right">月額</th><th>主な内容</th></tr></thead>
+      <tbody>
+        <tr><td>体験パッケージ</td><td class="right">1万円（単発）</td><td>アカウント診断、競合分析、改善アクションプラン、プロフィール改善案作成、オンライン相談1時間</td></tr>
+        <tr><td>ライトプラン</td><td class="right">15万円/月</td><td>戦略MTG月2回、企画・台本月4本、撮影・編集月4本、月次レポート、インハウス支援</td></tr>
+        <tr><td>レギュラープラン</td><td class="right">30万円/月</td><td>ライト全内容+企画・台本月8本、撮影・編集月8本、投稿代行、コメント一次対応、インハウス支援</td></tr>
+        <tr><td>フルプラン</td><td class="right">50万円/月</td><td>レギュラー全内容+DM一次対応+ストーリー月30回、インハウス支援</td></tr>
+        <tr><td>サポート/保守</td><td class="right">3万円/月</td><td>トレンド共有、月1回テレMTG</td></tr>
+        <tr><td>WEB CM制作</td><td class="right">20万〜50万円</td><td>15〜30秒のWEB CM。実写/イラスト/モーショングラフィック。都度見積もり</td></tr>
+      </tbody>
+    </table>
+
+    <h4>SNS事業の差別化ポイント</h4>
+    <ul>
+      <li><strong>「人が主役」の動画設計:</strong> スタッフ・トレーナー・キャストの個性で認知を取るノウハウ</li>
+      <li><strong>来店導線の一気通貫:</strong> SNS → DM/LINE → 予約 → 来店 → リピートまで設計</li>
+      <li><strong>撮影〜編集のチーム体制:</strong> 栗原さんの映像力 + 上田のディレクション</li>
+      <li><strong>月額プラン体系が確立済み:</strong> 15万〜50万、段階的なアップセル設計</li>
+      <li><strong>インハウス化支援:</strong> 最終的にクライアント自身でSNS運用ができる状態まで伴走。自走後はサポート/保守（3万/月）で継続関係を維持</li>
+    </ul>
+
+    <h4>ターゲット設計（夜職）</h4>
+    <table>
+      <thead><tr><th>区分</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>対象業態</td><td>バー・コンカフェ（両方対応）</td></tr>
+        <tr><td>想定顧客層</td><td>社会人</td></tr>
+        <tr><td>目標</td><td>新規獲得に加え「新規の常連化（リピート・固定客化）」を創出</td></tr>
+        <tr><td>対応エリア</td><td>全国対応（撮影は当面関東のみ）</td></tr>
+        <tr><td>ゴール</td><td>永続契約ではなく、<strong>インハウス化（クライアント自走）を目指す</strong></td></tr>
+      </tbody>
+    </table>
+    <p><strong>最低要件:</strong></p>
+    <ul>
+      <li>キャスト露出（顔出し）での発信に協力可能</li>
+      <li>店長/オーナーが意思決定でき、運用ルールを守れる</li>
+      <li>予約/来店導線（DM/LINE等）を整える意思がある</li>
+    </ul>
+    <p><strong>除外条件:</strong></p>
+    <ul>
+      <li>店内ルールが曖昧で炎上・規約リスクが高い</li>
+      <li>キャスト協力が得られず素材供給が止まる</li>
+      <li>「バズだけ」要求が強く、来店/常連化の合意がない</li>
+    </ul>
+
+    <h4>ポジショニング</h4>
+    <div class="info-box">
+      <p><strong>「キャストを主役にしたSNSで認知を取り、来店導線を整え、集客・採用の効率化までコミットする」</strong></p>
+    </div>
+    <ul>
+      <li>認知獲得（ショート動画中心）</li>
+      <li>プロフィール/固定投稿/ハイライトでの検討促進</li>
+      <li>DM一次対応と予約導線整備（回収）</li>
+      <li>常連化の仕組み（再来理由の設計）</li>
+    </ul>
+
+    <h4>インハウス化支援の詳細</h4>
+    <table>
+      <thead><tr><th>項目</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>支援内容</td><td>運用マニュアルを作成し引き継ぎ。スタッフへの撮影・編集指導</td></tr>
+        <tr><td>インハウス化後</td><td>月1回のテレMTGで最新トレンド共有、方向性の確認・軌道修正のアドバイス。月額3万円の保守プラン</td></tr>
+        <tr><td>想定期間</td><td>案件による（クライアントの状況に応じて柔軟に対応）</td></tr>
+      </tbody>
+    </table>
+
+    <h4>サブターゲット: 自動車関連</h4>
+    <table>
+      <thead><tr><th>項目</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>対象業態</td><td>自動車整備工場、中古車販売、ディーラー</td></tr>
+        <tr><td>優先度</td><td>夜職が軌道に乗ったら本格参入。当面は紹介ベースで対応</td></tr>
+        <tr><td>ターゲット要件</td><td>DM/SNSを立ち上げているが動かしていない、HPがきれい、関東圏、販売台数常時100台 or 2〜3店舗運営</td></tr>
+        <tr><td>本格参入条件</td><td>夜職が軌道に乗る（月間安定受注）/ 営業リソースに余裕ができる / 自動車専任メンバーの追加</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Web制作事業</h3>
+    <p>自動車整備工場・中古車販売会社・整骨院に特化した、<strong>低価格・高品質</strong>のWebサイト制作サービス。<br>
+    テンプレート × AI活用で、1人でも月5〜8件の制作が可能。<br>
+    <strong>戦略的位置づけ:</strong> SNS運用事業への「入口商品」。Web→MEO→SNSと段階的にアップセルする導線。</p>
+
+    <h4>Web制作 料金プラン</h4>
+    <table>
+      <thead><tr><th>プラン</th><th class="right">初期費用</th><th class="right">月額保守</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>スタンダード</td><td class="right">5万円</td><td class="right">1万円/月</td><td>レスポンシブ対応サイト、基本SEO、納期約2週間</td></tr>
+        <tr><td>プレミアム</td><td class="right">10万円</td><td class="right">1万円/月</td><td>スタンダード+写真撮影+スタッフ紹介+ブログ機能</td></tr>
+      </tbody>
+    </table>
+    <table>
+      <thead><tr><th>オプション</th><th class="right">価格</th><th>備考</th></tr></thead>
+      <tbody>
+        <tr><td>MEO対策</td><td class="right">+5,000円/月</td><td>Googleビジネスプロフィール最適化・口コミ管理</td></tr>
+        <tr><td>採用ページ</td><td class="right">2万円</td><td>スタッフ募集ページ</td></tr>
+        <tr><td>動画差し込み</td><td class="right">1.5万円</td><td>動画素材提供の場合。サイトへの埋め込み対応</td></tr>
+        <tr><td>動画撮影</td><td class="right">3万円</td><td>出張撮影（交通費実費）</td></tr>
+        <tr><td>LINE設定</td><td class="right">2万円</td><td>LINE公式アカウント開設・友だち追加特典設計</td></tr>
+      </tbody>
+    </table>
+
+    <h4>Web制作事業の強み</h4>
+    <ul>
+      <li><strong>事故なびネットワーク:</strong> 4,000院の整骨院 + 整備工場パートナーに直接営業可能（リスト不要）</li>
+      <li><strong>圧倒的な低価格:</strong> 一般Web制作会社の1/10以下（5万円〜）。テンプレート+AIで実現</li>
+      <li><strong>Web × SNS × 動画のワンストップ:</strong> 他社はWeb「だけ」。Opus.netは全部まとめて対応</li>
+      <li><strong>保守収入のストック効果:</strong> 月額1万円×件数が積み上がり、安定収入基盤に</li>
+    </ul>
+
+    <h3>アップセル構造</h3>
+    <div class="info-box">
+      <p><strong>Web制作（5〜10万）→ MEO（+5,000/月）→ SNS体験パック（1万）→ SNS運用（15〜50万/月）</strong></p>
+      <p>Web制作で接点を作り、成果を見せながら段階的に高単価サービスへ移行する設計。</p>
+    </div>
+  </div>
+
+  <!-- ===== 3. 工数・営業設計 ===== -->
+  <div class="section page-break" id="sec3">
+    <h2 class="section-title"><span class="section-number">3</span>SNS運用事業 工数・営業設計</h2>
+
+    <h3>プラン別工数</h3>
+    <p class="text-sub">前提: 時間単価 6,000円以上を維持</p>
+    <table>
+      <thead><tr><th>プラン</th><th class="right">月間工数</th><th class="right">上田の工数</th><th class="right">編集担当の工数</th><th class="right">時給換算</th></tr></thead>
+      <tbody>
+        <tr><td>1万円体験</td><td class="right">3時間</td><td class="right">3時間</td><td class="right">—</td><td class="right">3,333円</td></tr>
+        <tr><td>15万円</td><td class="right">28時間</td><td class="right">16時間</td><td class="right">16時間</td><td class="right">5,357円</td></tr>
+        <tr><td>30万円</td><td class="right">47時間</td><td class="right">17時間</td><td class="right">30時間</td><td class="right">6,383円</td></tr>
+        <tr><td>50万円</td><td class="right">67時間</td><td class="right">37時間</td><td class="right">30時間</td><td class="right">7,463円</td></tr>
+      </tbody>
+    </table>
+
+    <h4>15万円プラン工数内訳</h4>
+    <table>
+      <thead><tr><th>作業</th><th class="right">工数</th><th>担当</th></tr></thead>
+      <tbody>
+        <tr><td>MTG（月2回）</td><td class="right">2時間</td><td>上田</td></tr>
+        <tr><td>企画・台本作成（4本）</td><td class="right">2時間</td><td>上田</td></tr>
+        <tr><td>撮影（4本・移動込み）</td><td class="right">4時間</td><td>編集担当</td></tr>
+        <tr><td>編集（4本）</td><td class="right">12時間</td><td>編集担当</td></tr>
+        <tr><td>月次レポート</td><td class="right">2時間</td><td>上田</td></tr>
+        <tr><td>撮影同行</td><td class="right">4時間</td><td>上田</td></tr>
+        <tr><td>インハウス支援・フィードバック</td><td class="right">4時間</td><td>上田</td></tr>
+        <tr><td>ディレクション・素材確認</td><td class="right">2時間</td><td>上田</td></tr>
+        <tr class="subtotal-row"><td>合計</td><td class="right">28時間</td><td>上田16h / 編集16h（撮影4h重複）</td></tr>
+      </tbody>
+    </table>
+
+    <h3>営業チャネル</h3>
+    <table>
+      <thead><tr><th>チャネル</th><th>夜職</th><th>自動車</th><th>詳細</th></tr></thead>
+      <tbody>
+        <tr><td>SNS DM営業</td><td>メイン</td><td>サブ</td><td>Instagram/TikTok → 店舗アカウントへ</td></tr>
+        <tr><td>テレアポ</td><td>補助</td><td>メイン</td><td>店舗直接 / 運営会社・グループ</td></tr>
+        <tr><td>フォーム営業</td><td>あり</td><td>あり</td><td>企業HPの問い合わせフォーム</td></tr>
+        <tr><td>広告・営業代行</td><td>実績後</td><td>実績後</td><td>実績ができてから展開</td></tr>
+      </tbody>
+    </table>
+
+    <h3>営業フロー・切り口</h3>
+    <div class="info-box">
+      <p><strong>フロー:</strong> リスト作成 → DM送信 → 返信対応 → アポ → 商談（最大2回） → 成約</p>
+    </div>
+    <ul>
+      <li><strong>業界特化:</strong> 「夜職専門でSNS運用やっています」</li>
+      <li><strong>具体提案:</strong> 「御店のアカウント見ました」</li>
+      <li><strong>課題起点:</strong> 「集客のご状況いかがでしょうか」</li>
+    </ul>
+
+    <h4>初回DMの型</h4>
+    <div class="highlight-box">
+      <p>御店のアカウントとウェブサイトを拝見しました。SNSに力を入れられていると思うのですが、集客のご状況はいかがでしょうか。弊社では夜職に特化したSNS運用を行っておりまして、もしご興味があれば一度お打ち合わせの機会をいただけませんでしょうか。</p>
+    </div>
+
+    <h3>コンバージョン率（想定）</h3>
+    <table>
+      <thead><tr><th>ステップ</th><th class="right">想定率</th></tr></thead>
+      <tbody>
+        <tr><td>DM送信 → アポ</td><td class="right">3%</td></tr>
+        <tr><td>テレアポ → アポ</td><td class="right">1%</td></tr>
+        <tr><td>商談 → 成約</td><td class="right">20%</td></tr>
+      </tbody>
+    </table>
+
+    <h3>営業工数試算（FY2025 準備期間の実績・状況）</h3>
+    <p class="text-sub">※以下は事業開始前の準備期間（2〜3月）の試算。FY2026（4月〜）開始前の状況把握として掲載。</p>
+    <h4>売上計画</h4>
+    <table>
+      <thead><tr><th>月</th><th>15万円プラン</th><th>30万円プラン</th><th>1万円体験</th><th class="right">売上合計</th></tr></thead>
+      <tbody>
+        <tr><td>2月</td><td>2件（30万円）</td><td>1件（30万円）</td><td>2件（2万円）</td><td class="right">62万円</td></tr>
+        <tr><td>3月</td><td>4件（60万円）</td><td>1件（30万円）</td><td>−</td><td class="right">90万円</td></tr>
+      </tbody>
+    </table>
+
+    <h4>2月の工数計画</h4>
+    <table>
+      <thead><tr><th>担当</th><th class="right">必要工数</th><th class="right">キャパ</th><th class="right">過不足</th></tr></thead>
+      <tbody>
+        <tr><td>上田</td><td class="right">149時間</td><td class="right">160時間</td><td class="right">+11時間</td></tr>
+        <tr><td>チームメンバーA</td><td class="right">80時間</td><td class="right">80時間</td><td class="right">±0</td></tr>
+        <tr><td>編集担当者</td><td class="right">66時間</td><td class="right">120時間</td><td class="right">+54時間</td></tr>
+      </tbody>
+    </table>
+    <p class="text-sub">→ 2月は対応可能</p>
+
+    <h4>3月の工数計画</h4>
+    <table>
+      <thead><tr><th>担当</th><th class="right">必要工数</th><th class="right">キャパ</th><th class="right">過不足</th></tr></thead>
+      <tbody>
+        <tr><td>上田</td><td class="right">253時間</td><td class="right">160時間</td><td class="right bold" style="color: var(--danger);">−93時間</td></tr>
+        <tr><td>チームメンバーA</td><td class="right">80時間</td><td class="right">80時間</td><td class="right">±0</td></tr>
+        <tr><td>編集担当者</td><td class="right">102時間</td><td class="right">120時間</td><td class="right">+18時間</td></tr>
+      </tbody>
+    </table>
+    <div class="caution-box">
+      <p><strong>3月は93時間不足</strong>（上田の工数が1.7倍必要）。営業代行の活用・商談メンバー追加・オンライン商談比率の向上が急務。</p>
+    </div>
+  </div>
+
+  <!-- ===== 4. SNS運用事業 売上シミュレーション ===== -->
+  <div class="section page-break" id="sec4">
+    <h2 class="section-title"><span class="section-number">4</span>SNS運用事業 売上シミュレーション</h2>
+
+    <h3>前提条件</h3>
+    <table>
+      <thead><tr><th>項目</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>確定クライアント</td><td>1社（レギュラー30万/月・4月運用開始想定）</td></tr>
+        <tr><td>商談中</td><td>2件（①30万/月・1年契約・時期未定、②15万/月見込み）</td></tr>
+        <tr><td>平均単価</td><td>新規はライト〜レギュラー（15〜30万/月）で獲得</td></tr>
+        <tr><td>横展開</td><td>3月〜パーソナルジム、5月〜高単価飲食、秋〜美容クリニック</td></tr>
+        <tr><td>解約率</td><td>年10%想定（低解約＝月額モデルの強み）</td></tr>
+      </tbody>
+    </table>
+
+    <h3>業界横展開の戦略（売上シミュレーションの根拠）</h3>
+
+    <p>夜職（バー/コンカフェ）で培った<strong>「人を主役にした動画設計」「来店導線の構築」「常連化の仕組み」</strong>を他業界に転用する。<br>
+    業界を広げることで、SNS事業の成長速度と安定性を同時に高める。</p>
+
+    <h4>コア能力と転用先</h4>
+    <table>
+      <thead><tr><th>夜職で培ったコア能力</th><th>転用先の業界</th><th>転用の考え方</th></tr></thead>
+      <tbody>
+        <tr><td>人＝コンテンツの動画設計</td><td>パーソナルジム・美容クリニック</td><td>トレーナーや施術者が主役。夜職の「キャスト紹介」と構造が同じ</td></tr>
+        <tr><td>来店導線（SNS→DM/LINE→予約）</td><td>全業界共通</td><td>来店型ビジネスはすべて同じ導線設計が使える</td></tr>
+        <tr><td>常連化・リピート設計</td><td>高単価飲食・ジム</td><td>リピーター獲得の仕組みがそのまま応用可能</td></tr>
+        <tr><td>撮影〜編集のチーム体制</td><td>全業界共通</td><td>栗原さんの映像力は業界問わず強み</td></tr>
+      </tbody>
+    </table>
+
+    <h4>業界別の進出計画</h4>
+    <table>
+      <thead><tr><th>Phase</th><th>業界</th><th>時期</th><th>狙う理由</th><th>想定単価</th></tr></thead>
+      <tbody>
+        <tr><td><strong>現在</strong></td><td>夜職（バー/コンカフェ）</td><td>〜継続</td><td>実績のあるコア領域</td><td>15〜30万/月</td></tr>
+        <tr><td><strong>Phase 1</strong></td><td>パーソナルジム</td><td>3〜5月</td><td>予算が出やすい（客単価高）。TikTok特化の競合が少ない。トレーニング動画は型が決まっていて量産しやすい</td><td>15〜30万/月</td></tr>
+        <tr><td><strong>Phase 2</strong></td><td>高単価飲食</td><td>5〜8月</td><td>夜職の撮影ノウハウがそのまま転用可能。雰囲気訴求が同じ</td><td>15〜20万/月</td></tr>
+        <tr><td><strong>Phase 3</strong></td><td>美容クリニック</td><td>秋〜</td><td>予算感が最も合う（月30〜100万）。長期契約。医療広告ガイドラインが参入障壁＝競合少</td><td>30〜50万/月</td></tr>
+      </tbody>
+    </table>
+
+    <h4>避ける業界（当面）</h4>
+    <table>
+      <thead><tr><th>業界</th><th>理由</th></tr></thead>
+      <tbody>
+        <tr><td>美容室（個人店）</td><td>競合過多。月15万の予算が出にくい</td></tr>
+        <tr><td>ネイルサロン</td><td>個人経営中心。予算感が合わない</td></tr>
+        <tr><td>アパレル（実店舗のみ）</td><td>EC主戦場。来店型SNSの需要が限定的</td></tr>
+        <tr><td>整骨院（SNS運用）</td><td>予算が合わず撤退済み。Web制作は別途対応</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3シナリオ比較（月次推移）</h3>
+
+    <h4><span class="scenario-label scenario-conservative">保守的</span> 年間870万円（年度末5社・MRR 105万/月）</h4>
+    <p class="text-sub">横展開が想定より遅れた場合。夜職中心で堅実に積み上げるケース。</p>
+    <table>
+      <thead><tr><th>月</th><th>稼働社数</th><th>内訳</th><th class="right">月売上</th></tr></thead>
+      <tbody>
+        <tr><td>4月</td><td>1社</td><td>確定A 30万</td><td class="right">30万</td></tr>
+        <tr><td>5月</td><td>2社</td><td>+見込みA 15万</td><td class="right">45万</td></tr>
+        <tr><td>6月</td><td>2社</td><td>—</td><td class="right">45万</td></tr>
+        <tr><td>7月</td><td>2社</td><td>—</td><td class="right">45万</td></tr>
+        <tr><td>8月</td><td>2社</td><td>—</td><td class="right">45万</td></tr>
+        <tr><td>9月</td><td>3社</td><td>+新規 15万</td><td class="right">60万</td></tr>
+        <tr><td>10月</td><td>4社</td><td>+見込みB 30万</td><td class="right">90万</td></tr>
+        <tr><td>11月</td><td>4社</td><td>—</td><td class="right">90万</td></tr>
+        <tr><td>12月</td><td>5社</td><td>+新規 15万</td><td class="right">105万</td></tr>
+        <tr><td>1月</td><td>5社</td><td>—</td><td class="right">105万</td></tr>
+        <tr><td>2月</td><td>5社</td><td>—</td><td class="right">105万</td></tr>
+        <tr><td>3月</td><td>5社</td><td>—</td><td class="right">105万</td></tr>
+        <tr class="total-row"><td colspan="3">FY2026 合計</td><td class="right">870万</td></tr>
+      </tbody>
+    </table>
+
+    <h4><span class="scenario-label scenario-standard">標準</span> 年間1,360万円（年度末10社・MRR 185万/月）</h4>
+    <p class="text-sub">横展開が計画通り進んだ場合。ジム・飲食から成約が出始めるケース。</p>
+    <table>
+      <thead><tr><th>月</th><th>稼働社数</th><th>内訳</th><th class="right">月売上</th></tr></thead>
+      <tbody>
+        <tr><td>4月</td><td>2社</td><td>確定A 30万 + 見込みA 15万</td><td class="right">45万</td></tr>
+        <tr><td>5月</td><td>2社</td><td>—</td><td class="right">45万</td></tr>
+        <tr><td>6月</td><td>3社</td><td>+ジム 15万【Phase 1】</td><td class="right">60万</td></tr>
+        <tr><td>7月</td><td>4社</td><td>+見込みB 30万</td><td class="right">90万</td></tr>
+        <tr><td>8月</td><td>5社</td><td>+飲食 15万【Phase 2】</td><td class="right">105万</td></tr>
+        <tr><td>9月</td><td>5社</td><td>—</td><td class="right">105万</td></tr>
+        <tr><td>10月</td><td>6社</td><td>+新規 15万</td><td class="right">120万</td></tr>
+        <tr><td>11月</td><td>7社</td><td>+新規 20万（アップセル含）</td><td class="right">140万</td></tr>
+        <tr><td>12月</td><td>7社</td><td>—</td><td class="right">140万</td></tr>
+        <tr><td>1月</td><td>8社</td><td>+新規 15万</td><td class="right">155万</td></tr>
+        <tr><td>2月</td><td>9社</td><td>+新規 15万</td><td class="right">170万</td></tr>
+        <tr><td>3月</td><td>10社</td><td>+新規 15万</td><td class="right">185万</td></tr>
+        <tr class="total-row"><td colspan="3">FY2026 合計</td><td class="right">1,360万</td></tr>
+      </tbody>
+    </table>
+
+    <h4><span class="scenario-label scenario-aggressive">攻め</span> 年間2,060万円（年度末15社・MRR 260万/月）</h4>
+    <p class="text-sub">横展開が全て当たり、紹介も回り始めた場合。</p>
+    <table>
+      <thead><tr><th>月</th><th>稼働社数</th><th>内訳</th><th class="right">月売上</th></tr></thead>
+      <tbody>
+        <tr><td>4月</td><td>3社</td><td>確定A 30万 + 見込みA 15万 + 見込みB 30万</td><td class="right">75万</td></tr>
+        <tr><td>5月</td><td>4社</td><td>+ジム 15万【Phase 1】</td><td class="right">90万</td></tr>
+        <tr><td>6月</td><td>5社</td><td>+飲食 15万【Phase 2】</td><td class="right">105万</td></tr>
+        <tr><td>7月</td><td>6社</td><td>+新規 20万</td><td class="right">125万</td></tr>
+        <tr><td>8月</td><td>7社</td><td>+新規 15万</td><td class="right">140万</td></tr>
+        <tr><td>9月</td><td>8社</td><td>+新規 20万</td><td class="right">160万</td></tr>
+        <tr><td>10月</td><td>10社</td><td>+新規2社 30万</td><td class="right">190万</td></tr>
+        <tr><td>11月</td><td>11社</td><td>+新規 15万</td><td class="right">205万</td></tr>
+        <tr><td>12月</td><td>12社</td><td>+新規 20万</td><td class="right">225万</td></tr>
+        <tr><td>1月</td><td>13社</td><td>+新規 15万</td><td class="right">240万</td></tr>
+        <tr><td>2月</td><td>13社</td><td>—（季節要因）</td><td class="right">240万</td></tr>
+        <tr><td>3月</td><td>15社</td><td>+新規2社 − 解約1社</td><td class="right">260万</td></tr>
+        <tr class="total-row"><td colspan="3">FY2026 合計</td><td class="right">2,060万</td></tr>
+      </tbody>
+    </table>
+
+    <div class="highlight-box">
+      <p><strong>ポジショニングの進化:</strong></p>
+      <p>「夜職専門のSNS運用」→「人が主役の店舗SNS運用」→「来店型ビジネスの外部マーケティング部」</p>
+      <p>業界を広げても<strong>「人 × 来店 × 動画」</strong>の軸はブレない。これがOpus.netの一貫したポジション。</p>
+    </div>
+  </div>
+
+  <!-- ===== 5. Web制作事業 売上シミュレーション ===== -->
+  <div class="section page-break" id="sec5">
+    <h2 class="section-title"><span class="section-number">5</span>Web制作事業 売上シミュレーション</h2>
+
+    <h3>前提条件</h3>
+    <table>
+      <thead><tr><th>項目</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>制作単価</td><td>Standard 5万 / Premium 10万（平均7.5万想定）</td></tr>
+        <tr><td>月額保守</td><td>1万/月（1年契約・自動更新）</td></tr>
+        <tr><td>キャパシティ</td><td>上田1人で月5件が上限（プレミアム混在時）</td></tr>
+        <tr><td>営業チャネル</td><td>事故なびネットワーク紹介（メイン）+ テレアポ + Googleマップ営業</td></tr>
+        <tr><td>オプション</td><td>MEO +5,000/月（30%が付帯と想定）。採用ページ・動画等は都度</td></tr>
+        <tr><td>解約率</td><td>保守は年5%想定（1年契約のため低い）</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3シナリオ比較（四半期）</h3>
+
+    <h4><span class="scenario-label scenario-conservative">保守的</span> 月2〜3件ペース</h4>
+    <table>
+      <thead><tr><th>四半期</th><th>新規件数</th><th>保守累計</th><th class="right">制作売上</th><th class="right">保守売上</th><th class="right">合計</th></tr></thead>
+      <tbody>
+        <tr><td>Q1（4〜6月）</td><td>5件</td><td>5件</td><td class="right">37.5万</td><td class="right">9万</td><td class="right">46.5万</td></tr>
+        <tr><td>Q2（7〜9月）</td><td>9件</td><td>14件</td><td class="right">67.5万</td><td class="right">33万</td><td class="right">100.5万</td></tr>
+        <tr><td>Q3（10〜12月）</td><td>9件</td><td>23件</td><td class="right">67.5万</td><td class="right">57万</td><td class="right">124.5万</td></tr>
+        <tr><td>Q4（1〜3月）</td><td>9件</td><td>32件</td><td class="right">67.5万</td><td class="right">81万</td><td class="right">148.5万</td></tr>
+        <tr class="total-row"><td>FY2026 合計</td><td>32件</td><td>32件</td><td class="right">240万</td><td class="right">180万</td><td class="right bold">420万</td></tr>
+      </tbody>
+    </table>
+
+    <h4><span class="scenario-label scenario-standard">標準</span> 月3〜5件ペース</h4>
+    <table>
+      <thead><tr><th>四半期</th><th>新規件数</th><th>保守累計</th><th class="right">制作売上</th><th class="right">保守売上</th><th class="right">合計</th></tr></thead>
+      <tbody>
+        <tr><td>Q1（4〜6月）</td><td>9件</td><td>9件</td><td class="right">67.5万</td><td class="right">18万</td><td class="right">85.5万</td></tr>
+        <tr><td>Q2（7〜9月）</td><td>15件</td><td>24件</td><td class="right">112.5万</td><td class="right">57万</td><td class="right">169.5万</td></tr>
+        <tr><td>Q3（10〜12月）</td><td>15件</td><td>39件</td><td class="right">112.5万</td><td class="right">96万</td><td class="right">208.5万</td></tr>
+        <tr><td>Q4（1〜3月）</td><td>15件</td><td>54件</td><td class="right">112.5万</td><td class="right">141万</td><td class="right">253.5万</td></tr>
+        <tr class="total-row"><td>FY2026 合計</td><td>54件</td><td>54件</td><td class="right">405万</td><td class="right">312万</td><td class="right bold">717万</td></tr>
+      </tbody>
+    </table>
+
+    <h4><span class="scenario-label scenario-aggressive">攻め</span> 月5〜8件ペース（外注活用）</h4>
+    <table>
+      <thead><tr><th>四半期</th><th>新規件数</th><th>保守累計</th><th class="right">制作売上</th><th class="right">保守売上</th><th class="right">合計</th></tr></thead>
+      <tbody>
+        <tr><td>Q1（4〜6月）</td><td>12件</td><td>12件</td><td class="right">90万</td><td class="right">24万</td><td class="right">114万</td></tr>
+        <tr><td>Q2（7〜9月）</td><td>21件</td><td>33件</td><td class="right">157.5万</td><td class="right">78万</td><td class="right">235.5万</td></tr>
+        <tr><td>Q3（10〜12月）</td><td>24件</td><td>57件</td><td class="right">180万</td><td class="right">138万</td><td class="right">318万</td></tr>
+        <tr><td>Q4（1〜3月）</td><td>24件</td><td>81件</td><td class="right">180万</td><td class="right">207万</td><td class="right">387万</td></tr>
+        <tr class="total-row"><td>FY2026 合計</td><td>81件</td><td>81件</td><td class="right">607.5万</td><td class="right">447万</td><td class="right bold">1,054.5万</td></tr>
+      </tbody>
+    </table>
+
+    <div class="highlight-box">
+      <p><strong>Web制作事業の本当の価値は保守収入の積み上げ。</strong></p>
+      <p>標準シナリオで年度末に月54万の固定収入。2年目には100件超で月100万のストック収入に成長する。</p>
+    </div>
+  </div>
+
+  <!-- ===== 6. 合算売上 ===== -->
+  <div class="section page-break" id="sec6">
+    <h2 class="section-title"><span class="section-number">6</span>合算売上（3年間の見通し）</h2>
+
+    <h3>FY2026〜FY2028 年間売上比較</h3>
+    <table>
+      <thead><tr><th></th><th class="right">FY2026<br>（初年度）</th><th class="right">FY2027<br>（2年目）</th><th class="right">FY2028<br>（3年目）</th></tr></thead>
+      <tbody>
+        <tr><td colspan="4" style="background: var(--primary); color: #fff; font-weight: 600; font-size: 12px;">保守的シナリオ</td></tr>
+        <tr><td>SNS事業</td><td class="right">870万</td><td class="right">1,500万</td><td class="right">2,200万</td></tr>
+        <tr><td>Web制作事業</td><td class="right">420万</td><td class="right">700万</td><td class="right">900万</td></tr>
+        <tr class="subtotal-row"><td>合計</td><td class="right bold">1,290万</td><td class="right bold">2,200万</td><td class="right bold">3,100万</td></tr>
+        <tr><td>年度末MRR（月商）</td><td class="right">137万/月</td><td class="right">220万/月</td><td class="right">300万/月</td></tr>
+
+        <tr><td colspan="4" style="background: var(--primary); color: #fff; font-weight: 600; font-size: 12px;">標準シナリオ</td></tr>
+        <tr><td>SNS事業</td><td class="right">1,360万</td><td class="right">2,700万</td><td class="right">4,000万</td></tr>
+        <tr><td>Web制作事業</td><td class="right">717万</td><td class="right">1,200万</td><td class="right">1,500万</td></tr>
+        <tr class="subtotal-row"><td>合計</td><td class="right bold">2,077万</td><td class="right bold">3,900万</td><td class="right bold">5,500万</td></tr>
+        <tr><td>年度末MRR（月商）</td><td class="right">239万/月</td><td class="right">410万/月</td><td class="right">550万/月</td></tr>
+
+        <tr><td colspan="4" style="background: var(--primary); color: #fff; font-weight: 600; font-size: 12px;">攻めシナリオ</td></tr>
+        <tr><td>SNS事業</td><td class="right">2,060万</td><td class="right">3,800万</td><td class="right">5,500万</td></tr>
+        <tr><td>Web制作事業</td><td class="right">1,054万</td><td class="right">1,800万</td><td class="right">2,200万</td></tr>
+        <tr class="subtotal-row"><td>合計</td><td class="right bold">3,114万</td><td class="right bold">5,600万</td><td class="right bold">7,700万</td></tr>
+        <tr><td>年度末MRR（月商）</td><td class="right">341万/月</td><td class="right">570万/月</td><td class="right">750万/月</td></tr>
+      </tbody>
+    </table>
+
+    <h3>売上構成の変化（標準シナリオ）</h3>
+    <table>
+      <thead><tr><th></th><th class="right">FY2026</th><th class="right">FY2027</th><th class="right">FY2028</th></tr></thead>
+      <tbody>
+        <tr><td>SNS事業の比率</td><td class="right">65%</td><td class="right">69%</td><td class="right">73%</td></tr>
+        <tr><td>Web制作事業の比率</td><td class="right">35%</td><td class="right">31%</td><td class="right">27%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box">
+      <p><strong>初年度はWebとSNSが6:4。年を追うごとにSNS事業の比率が上がる。</strong></p>
+      <p>Web制作は「入口商品 + ストック収入源」、SNS運用は「主力の高単価サービス」という構造。</p>
+    </div>
+  </div>
+
+  <!-- ===== 7. コスト構造 ===== -->
+  <div class="section page-break" id="sec7">
+    <h2 class="section-title"><span class="section-number">7</span>コスト構造</h2>
+
+    <h3>固定費（既存）</h3>
+    <table>
+      <thead><tr><th>項目</th><th>月額</th><th>備考</th></tr></thead>
+      <tbody>
+        <tr><td>人件費（上田）</td><td>—</td><td>※松本さんにて把握。本ドラフトでは空欄</td></tr>
+        <tr><td>人件費（栗原さん）</td><td>—</td><td>※映像関連業務。既存固定給に含まれる想定</td></tr>
+        <tr><td>Claude Code MAX（×20）</td><td>約3万</td><td>$200/月。コーディング・資料作成の効率化</td></tr>
+        <tr><td>ChatGPT Plus</td><td>約0.3万</td><td>$20/月。リサーチ・文章生成</td></tr>
+        <tr><td>Google Workspace Standard</td><td>約0.15万</td><td>¥1,500/月×1名（上田のみ）</td></tr>
+        <tr><td>API利用料（Claude等）</td><td>約0.5万</td><td>自動化・バッチ処理用。利用量で変動</td></tr>
+        <tr><td>サーバー（さくらスタンダード）</td><td>約0.1万</td><td>¥500/月。200サイト対応・1契約で十分。ドメインはクライアント負担</td></tr>
+        <tr><td>デザインツール（Canva Pro等）</td><td>約0.2万</td><td></td></tr>
+        <tr class="subtotal-row"><td>追加固定費 小計</td><td>約4.3万/月</td><td>年間約52万</td></tr>
+      </tbody>
+    </table>
+
+    <h3>変動費</h3>
+    <table>
+      <thead><tr><th>項目</th><th>単価</th><th>頻度</th><th>備考</th></tr></thead>
+      <tbody>
+        <tr><td>交通費（商談・撮影）</td><td>2,000〜5,000円/回</td><td>月4〜8回</td><td>関東圏内</td></tr>
+        <tr><td>外注費（コーディング）</td><td>2〜3万/件</td><td>月5件超時</td><td>テンプレートベースのカスタマイズ</td></tr>
+        <tr><td>撮影経費</td><td>実費</td><td>プレミアム案件時</td><td>機材は既存</td></tr>
+      </tbody>
+    </table>
+
+    <h3>広告費</h3>
+
+    <div class="caution-box">
+      <p><strong>初期（FY2026前半）は広告費ゼロで問題ない。</strong></p>
+      <p>理由: ① LPに掲載する成功事例がまだない ② 「夜職オーナー」は広告ターゲティングが困難（Meta広告の興味関心で精密に絞れない→CPAが跳ね上がる） ③ DM営業の型が未確立の段階で広告を打つのはコスト効率が悪い ④ 現状の工数で商談キャパが不足しており、リードを増やしても捌けない</p>
+    </div>
+
+    <h4>広告開始条件</h4>
+    <ul>
+      <li>成功事例が2〜3件揃う（LP掲載素材ができる）→ FY2026 Q2〜Q3</li>
+      <li>DM営業の型が確立する（CV率が安定する）→ FY2026 Q2</li>
+      <li>対応キャパに余裕ができる（人員追加後）→ FY2026 Q3〜</li>
+    </ul>
+
+    <h4>段階的な予算計画</h4>
+    <table>
+      <thead><tr><th>フェーズ</th><th>時期</th><th class="right">月額</th><th class="right">年間</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>Phase 0</td><td>FY2026 Q1〜Q2</td><td class="right">0円</td><td class="right">0円</td><td>自社SNSでの事例発信のみ</td></tr>
+        <tr><td>Phase 1</td><td>FY2026 Q3〜Q4</td><td class="right">5万</td><td class="right">30万</td><td>Meta広告 or Google広告のテスト運用</td></tr>
+        <tr><td>Phase 2</td><td>FY2027</td><td class="right">10万</td><td class="right">120万</td><td>効果のあったチャネルに集中投下</td></tr>
+        <tr><td>Phase 3</td><td>FY2028</td><td class="right">15〜20万</td><td class="right">200万</td><td>業界別にクリエイティブを最適化</td></tr>
+      </tbody>
+    </table>
+
+    <h4>金額の根拠</h4>
+    <table>
+      <thead><tr><th>チャネル</th><th class="right">月額</th><th>根拠</th></tr></thead>
+      <tbody>
+        <tr><td>自社SNS（TikTok/Instagram）</td><td class="right">0円</td><td>クライアント事例動画を自社アカウントで発信。最もROIが高い</td></tr>
+        <tr><td>Meta広告（Instagram）</td><td class="right">3〜5万</td><td>日予算1,000〜1,700円。リード単価3,000〜8,000円で月6〜16件のリード獲得想定</td></tr>
+        <tr><td>Google検索広告</td><td class="right">3〜5万</td><td>CPC 200〜500円 × 100〜250クリック。CVR 3〜5%で月3〜12件のリード獲得想定</td></tr>
+      </tbody>
+    </table>
+    <p class="text-sub">※Phase 1ではMeta・Googleのどちらか片方をテスト。効果が出たチャネルにPhase 2以降で集中する。</p>
+
+    <h3>追加人員のコスト（将来発生）</h3>
+    <table>
+      <thead><tr><th>ポジション</th><th>想定月額</th><th>採用時期</th><th>トリガー</th></tr></thead>
+      <tbody>
+        <tr><td>SNSディレクター（業務委託）</td><td>25〜30万</td><td>FY2026 Q3〜</td><td>SNS稼働5社超</td></tr>
+        <tr><td>Webコーダー（業務委託）</td><td>15〜20万</td><td>FY2026 Q4〜</td><td>Web制作月5件超が常態化</td></tr>
+        <tr><td>営業アシスタント（パート等）</td><td>10〜15万</td><td>FY2027〜</td><td>営業リスト・架電の代行</td></tr>
+      </tbody>
+    </table>
+
+    <h3>FY2026 コスト推計（標準シナリオ）</h3>
+    <table>
+      <thead><tr><th>四半期</th><th class="right">固定費</th><th class="right">変動費</th><th class="right">広告費</th><th class="right">人員追加</th><th class="right">合計</th></tr></thead>
+      <tbody>
+        <tr><td>Q1（4〜6月）</td><td class="right">13万</td><td class="right">6万</td><td class="right">—</td><td class="right">—</td><td class="right">19万</td></tr>
+        <tr><td>Q2（7〜9月）</td><td class="right">13万</td><td class="right">8万</td><td class="right">—</td><td class="right">—</td><td class="right">21万</td></tr>
+        <tr><td>Q3（10〜12月）</td><td class="right">13万</td><td class="right">10万</td><td class="right">15万</td><td class="right">75万</td><td class="right">113万</td></tr>
+        <tr><td>Q4（1〜3月）</td><td class="right">13万</td><td class="right">12万</td><td class="right">15万</td><td class="right">135万</td><td class="right">175万</td></tr>
+        <tr class="total-row"><td>FY2026 合計</td><td class="right">52万</td><td class="right">36万</td><td class="right">30万</td><td class="right">210万</td><td class="right bold">328万</td></tr>
+      </tbody>
+    </table>
+    <p class="text-sub">※既存人件費（上田・栗原さん）は含まず。松本さんにて加算ください。</p>
+  </div>
+
+  <!-- ===== 8. 必要人員とタイミング ===== -->
+  <div class="section page-break" id="sec8">
+    <h2 class="section-title"><span class="section-number">8</span>必要人員とタイミング</h2>
+
+    <h3>現在のチーム体制</h3>
+    <table>
+      <thead><tr><th>メンバー</th><th>役割</th><th class="right">月間キャパ</th></tr></thead>
+      <tbody>
+        <tr><td>上田</td><td>営業、商談、MTG、企画・台本、レポート、DM対応、ストーリー</td><td class="right">160時間</td></tr>
+        <tr><td>チームメンバーA</td><td>リスト作成、DM送信</td><td class="right">80時間</td></tr>
+        <tr><td>編集担当者（栗原さん）</td><td>撮影、動画編集</td><td class="right">120時間</td></tr>
+      </tbody>
+    </table>
+
+    <h3>現体制の限界ライン</h3>
+    <table>
+      <thead><tr><th>業務</th><th>上田1人の上限</th><th>超えた場合の対応</th></tr></thead>
+      <tbody>
+        <tr><td>SNS運用（ディレクション）</td><td><strong>4〜5社</strong></td><td>ディレクター追加</td></tr>
+        <tr><td>Web制作</td><td><strong>月5件</strong>（プレミアム混在時）</td><td>コーダー外注</td></tr>
+        <tr><td>営業活動</td><td>上記+商談で<strong>週2〜3件</strong></td><td>常田さん兼任 or アシスタント</td></tr>
+      </tbody>
+    </table>
+
+    <h3>人員追加ロードマップ</h3>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-period">FY2026 Q1〜Q2（4〜9月）</div>
+        <div class="timeline-title">上田 + 栗原さんの2名体制</div>
+        <ul>
+          <li>上田: 営業 + ディレクション + Web制作 + CRM保守</li>
+          <li>栗原: 動画撮影・編集（SNS案件 + Web制作プレミアム）</li>
+          <li>常田・柴田: 事故なび営業時にWeb制作のチラシ配布（兼任）</li>
+        </ul>
+      </div>
+
+      <div class="timeline-item milestone">
+        <div class="timeline-period">FY2026 Q3（10〜12月）★最初の採用</div>
+        <div class="timeline-title">SNSディレクター 1名追加（業務委託）</div>
+        <ul>
+          <li><strong>トリガー:</strong> SNS稼働5社を超えた時点</li>
+          <li><strong>役割:</strong> SNS投稿の企画・台本・投稿管理の実行</li>
+          <li><strong>効果:</strong> 上田がSNSの実行から離れ、営業・全体戦略に集中できる</li>
+          <li><strong>コスト:</strong> 月25〜30万（業務委託）</li>
+          <li><strong>採用基準:</strong> TikTok運用経験あり。夜職 or 美容系の経験があると理想</li>
+        </ul>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-period">FY2026 Q4（1〜3月）</div>
+        <div class="timeline-title">Webコーダー 1名追加（業務委託）</div>
+        <ul>
+          <li><strong>トリガー:</strong> Web制作が月5件超で常態化した時点</li>
+          <li><strong>役割:</strong> テンプレートベースのコーディング・テスト</li>
+          <li><strong>効果:</strong> 上田は商談とディレクションに集中</li>
+          <li><strong>コスト:</strong> 月15〜20万（業務委託 or 案件単価制）</li>
+        </ul>
+      </div>
+
+      <div class="timeline-item milestone">
+        <div class="timeline-period">FY2027（2年目）</div>
+        <div class="timeline-title">営業力の拡大</div>
+        <ul>
+          <li>常田さんにWeb制作の商談を本格的に任せる（トークスクリプト・デモ操作の教育）</li>
+          <li>必要に応じて営業アシスタント追加（リスト作成・架電代行）</li>
+          <li>SNSディレクターを正社員化の検討</li>
+        </ul>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-period">FY2028（3年目）</div>
+        <div class="timeline-title">チーム体制の確立</div>
+        <ul>
+          <li>上田: 事業統括・戦略・重要商談</li>
+          <li>SNSチーム: ディレクター1〜2名 + 栗原さん（映像）</li>
+          <li>Webチーム: コーダー1名 + 外注ネットワーク</li>
+          <li>営業: 常田さん（兼任）+ アシスタント</li>
+          <li><strong>想定チーム規模: 正社員+業務委託で5〜7名</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <p><strong>採用の考え方: 「売上が先、人が後」。</strong></p>
+      <p>売上が出てからコストをかける。業務委託スタートで固定費を抑え、確実に成果が出るポジションから正社員化する。</p>
+    </div>
+  </div>
+
+  <!-- ===== 9. 損益イメージ ===== -->
+  <div class="section page-break" id="sec9">
+    <h2 class="section-title"><span class="section-number">9</span>損益イメージ（標準シナリオ）</h2>
+
+    <p class="text-sub">※既存人件費は松本さんにて加算してください。ここでは<strong>追加コストのみ</strong>で試算。</p>
+
+    <table>
+      <thead><tr><th></th><th class="right">FY2026</th><th class="right">FY2027</th><th class="right">FY2028</th></tr></thead>
+      <tbody>
+        <tr><td colspan="4" style="background: #ebf8ff; font-weight: 600; font-size: 12px; color: var(--primary);">売上</td></tr>
+        <tr><td>SNS事業</td><td class="right">1,360万</td><td class="right">2,700万</td><td class="right">4,000万</td></tr>
+        <tr><td>Web制作事業（制作）</td><td class="right">405万</td><td class="right">450万</td><td class="right">450万</td></tr>
+        <tr><td>Web制作事業（保守）</td><td class="right">312万</td><td class="right">750万</td><td class="right">1,050万</td></tr>
+        <tr class="subtotal-row"><td>売上合計</td><td class="right bold">2,077万</td><td class="right bold">3,900万</td><td class="right bold">5,500万</td></tr>
+
+        <tr><td colspan="4" style="background: #fff5f5; font-weight: 600; font-size: 12px; color: var(--danger);">追加コスト（既存人件費除く）</td></tr>
+        <tr><td>ツール・サーバー</td><td class="right">52万</td><td class="right">70万</td><td class="right">85万</td></tr>
+        <tr><td>広告費</td><td class="right">30万</td><td class="right">120万</td><td class="right">200万</td></tr>
+        <tr><td>営業経費（交通費等）</td><td class="right">36万</td><td class="right">48万</td><td class="right">60万</td></tr>
+        <tr><td>人員追加</td><td class="right">210万</td><td class="right">600万</td><td class="right">900万</td></tr>
+        <tr class="subtotal-row"><td>追加コスト合計</td><td class="right bold">328万</td><td class="right bold">838万</td><td class="right bold">1,245万</td></tr>
+
+        <tr><td colspan="4" style="background: #f0fff4; font-weight: 600; font-size: 12px; color: var(--success);">利益（既存人件費控除前）</td></tr>
+        <tr class="total-row"><td>粗利</td><td class="right bold">1,749万</td><td class="right bold">3,062万</td><td class="right bold">4,255万</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box">
+      <p><strong>「粗利」= 売上 − 追加コスト。</strong>ここから既存人件費（上田・栗原さんの給与）を引いたものが営業利益。</p>
+      <p>松本さんにて人件費を加算し、最終的な利益ラインを確認してください。</p>
+      <p>※Web制作売上がFY2027以降で横ばい（450万）なのは、コーダー追加は上田の負荷軽減が目的であり、制作件数自体は月5件を維持する想定のため。件数を増やす場合は上振れ要因。</p>
+    </div>
+
+    <h3>年度末MRR（月次固定収入）の推移</h3>
+    <table>
+      <thead><tr><th></th><th class="right">FY2026末</th><th class="right">FY2027末</th><th class="right">FY2028末</th></tr></thead>
+      <tbody>
+        <tr><td>SNS運用 MRR</td><td class="right">185万</td><td class="right">300万</td><td class="right">400万</td></tr>
+        <tr><td>Web保守 MRR</td><td class="right">54万</td><td class="right">110万</td><td class="right">150万</td></tr>
+        <tr class="total-row"><td>合計 MRR</td><td class="right bold">239万/月</td><td class="right bold">410万/月</td><td class="right bold">550万/月</td></tr>
+      </tbody>
+    </table>
+
+    <div class="highlight-box">
+      <p><strong>3年後に月550万のストック収入。</strong>これが事業の安定基盤になる。</p>
+      <p>新規制作・新規SNS成約は上乗せで、ストック収入だけで事業として成立する状態を目指す。</p>
+    </div>
+  </div>
+
+  <!-- ===== 10. 初期3ヶ月の実行計画 ===== -->
+  <div class="section page-break" id="sec10">
+    <h2 class="section-title"><span class="section-number">10</span>初期3ヶ月の実行計画</h2>
+
+    <div class="info-box">
+      <p><strong>方針:</strong> 複数店舗で並行運用しながら「型」を確立する</p>
+      <p><strong>確立するもの:</strong> 営業・提案の型、企画・台本テンプレ</p>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-period">1ヶ月目（2月）</div>
+        <div class="timeline-title">土台づくり</div>
+        <ul>
+          <li><strong>営業面:</strong> DM営業の開始・反応率の検証、商談トーク・提案資料の初版作成、成約/失注の理由を記録</li>
+          <li><strong>コンテンツ面:</strong> 企画カテゴリの洗い出し、台本テンプレの初版作成、編集レギュの策定</li>
+        </ul>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-period">2ヶ月目（3月）</div>
+        <div class="timeline-title">型の確立</div>
+        <ul>
+          <li><strong>営業面:</strong> DM文面の改善、商談トークの改善、提案資料のブラッシュアップ</li>
+          <li><strong>コンテンツ面:</strong> 運用しながらテンプレ改善、伸びる/伸びないの傾向を言語化、編集クオリティの標準化</li>
+        </ul>
+      </div>
+      <div class="timeline-item milestone">
+        <div class="timeline-period">3ヶ月目（4月）</div>
+        <div class="timeline-title">仕組み化</div>
+        <ul>
+          <li><strong>営業面:</strong> 営業フローのマニュアル化、外注・営業代行の準備、KPI管理の仕組み化</li>
+          <li><strong>コンテンツ面:</strong> 勝ちパターンの言語化、テンプレートの完成、新メンバーへの引き継ぎ準備</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 11. 2〜3年 成長ロードマップ ===== -->
+  <div class="section page-break" id="sec11">
+    <h2 class="section-title"><span class="section-number">11</span>2〜3年 成長ロードマップ</h2>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-period">FY2026 前半（4〜9月）— 立ち上げ期</div>
+        <div class="timeline-title">Web制作で入り込む + SNSは夜職で実績固め + ジム開拓</div>
+        <ul>
+          <li>Web制作: 事故なびネットワークへの案内開始。月3〜5件ペースを確立</li>
+          <li>SNS（夜職）: 確定・商談中クライアントで実績・事例を蓄積</li>
+          <li><strong>SNS横展開Phase 1:</strong> パーソナルジムへDM営業を開始（3月〜）。リスト30→70件、DM40→120件を目標に打ち込む</li>
+          <li>ジム1〜2社成約を狙い、夜職以外の実績を早期に作る</li>
+          <li><strong>目標月商: 60〜100万</strong></li>
+        </ul>
+      </div>
+
+      <div class="timeline-item milestone">
+        <div class="timeline-period">FY2026 後半（10〜3月）— 型の確立期</div>
+        <div class="timeline-title">飲食・美容クリニックへ拡大 + SNSディレクター採用</div>
+        <ul>
+          <li>Web制作: 月5件安定。保守収入が月30〜50万に成長</li>
+          <li>SNS（夜職+ジム）: 実績が揃い始め、紹介も発生</li>
+          <li><strong>SNS横展開Phase 2:</strong> 高単価飲食（バー・ダイニング・高級居酒屋）へ展開。夜職の撮影ノウハウをそのまま転用</li>
+          <li><strong>SNS横展開Phase 3準備:</strong> 美容クリニック向けの医療広告ガイドライン学習・提案書作成</li>
+          <li>初のアップセル: Web→MEO→SNSへの顧客移行が始まる</li>
+          <li>SNSディレクター採用で上田の負荷を分散</li>
+          <li>ポジション: 「夜職専門」→<strong>「人が主役の店舗SNS運用」</strong>に進化</li>
+          <li><strong>目標月商: 150〜200万</strong></li>
+        </ul>
+      </div>
+
+      <div class="timeline-item milestone">
+        <div class="timeline-period">FY2027（2年目）— 成長期</div>
+        <div class="timeline-title">美容クリニック参入 +「外部マーケティング部」のポジション浸透</div>
+        <ul>
+          <li>Web制作: 保守100件超 → 月100万のストック収入</li>
+          <li><strong>SNS横展開Phase 3:</strong> 美容クリニック本格参入。月30〜50万の高単価帯で平均単価を引き上げ</li>
+          <li>SNS: 15社前後（夜職3〜4社 + ジム3〜4社 + 飲食3〜4社 + クリニック1〜2社 + 他）</li>
+          <li>MEO・LINE構築・広告運用などサービスラインを拡充</li>
+          <li>成功事例が業界ごとに揃い、紹介での受注が回り始める</li>
+          <li>常田さんもWeb商談を担当 → 営業力が倍に</li>
+          <li>ポジション: <strong>「来店型ビジネスの外部マーケティング部」</strong></li>
+          <li><strong>目標月商: 250〜350万</strong></li>
+        </ul>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-period">FY2028（3年目）— 安定期</div>
+        <div class="timeline-title">複数業界で実績確立 → 事業として自走するチーム体制</div>
+        <ul>
+          <li>SNS: 20社以上（夜職5社 + ジム5社 + 飲食5社 + クリニック3社 + 他2社）</li>
+          <li>美容クリニック案件が月30〜50万帯で平均単価を底上げ</li>
+          <li>Web保守: 150件 → 月150万のストック</li>
+          <li>業界ごとに成功事例が揃い、「○○業界に強い」が営業資料なしでも伝わる状態</li>
+          <li>上田の役割: 戦略・重要商談・新規事業企画にシフト</li>
+          <li>チーム5〜7名で運営</li>
+          <li>ポジション: <strong>「人 × 来店 × 動画の業界特化DXパートナー」</strong></li>
+          <li><strong>目標月商: 450〜550万</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>業界ポートフォリオの推移</h3>
+    <table>
+      <thead><tr><th>業界</th><th class="right">FY2026末</th><th class="right">FY2027末</th><th class="right">FY2028末</th></tr></thead>
+      <tbody>
+        <tr><td>夜職（バー/コンカフェ）</td><td class="right">3〜4社</td><td class="right">4〜5社</td><td class="right">5社</td></tr>
+        <tr><td>パーソナルジム</td><td class="right">2〜3社</td><td class="right">3〜4社</td><td class="right">5社</td></tr>
+        <tr><td>高単価飲食</td><td class="right">1〜2社</td><td class="right">3〜4社</td><td class="right">5社</td></tr>
+        <tr><td>美容クリニック</td><td class="right">0〜1社</td><td class="right">1〜2社</td><td class="right">3社</td></tr>
+        <tr><td>その他</td><td class="right">0〜1社</td><td class="right">1〜2社</td><td class="right">2社</td></tr>
+        <tr class="total-row"><td>SNS合計</td><td class="right bold">8〜10社</td><td class="right bold">13〜17社</td><td class="right bold">20社</td></tr>
+      </tbody>
+    </table>
+
+    <h3>サービスの進化イメージ</h3>
+    <table>
+      <thead><tr><th>フェーズ</th><th>SNS対象業界</th><th>提供サービス</th><th>ポジション</th></tr></thead>
+      <tbody>
+        <tr><td>今（FY2026前半）</td><td>夜職 + ジム開拓中</td><td>Web制作 + SNS運用</td><td>「安くて早いWeb屋 + 夜職SNS屋」</td></tr>
+        <tr><td>FY2026後半</td><td>+ 高単価飲食</td><td>+ MEO対策</td><td>「人が主役の店舗SNS運用」</td></tr>
+        <tr><td>FY2027</td><td>+ 美容クリニック</td><td>+ 広告運用 + LINE構築</td><td>「来店型ビジネスの外部マーケ部」</td></tr>
+        <tr><td>FY2028〜</td><td>5業界で展開</td><td>+ データ分析 + 採用支援</td><td>「業界特化のDXパートナー」</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== 12. AI活用方針 ===== -->
+  <div class="section page-break" id="sec12">
+    <h2 class="section-title"><span class="section-number">12</span>AI活用方針</h2>
+    <p>以下の工程でAIを活用し、効率化を図る。</p>
+    <table>
+      <thead><tr><th>カテゴリ</th><th>工程</th><th>AI活用方法</th></tr></thead>
+      <tbody>
+        <tr><td>営業関連</td><td>リスト作成</td><td>スクレイピング自動化、情報整理、見込み度判定</td></tr>
+        <tr><td>営業関連</td><td>DM作成</td><td>テンプレート + 店舗情報でカスタマイズ</td></tr>
+        <tr><td>コンテンツ制作</td><td>企画・台本</td><td>アイデア出し、トレンド分析、台本ドラフト生成</td></tr>
+        <tr><td>コンテンツ制作</td><td>ストーリー画像</td><td>画像生成AI活用</td></tr>
+        <tr><td>運用・対応</td><td>コメント返信</td><td>返信案をAI生成 → 確認して送信</td></tr>
+        <tr><td>運用・対応</td><td>DM一次対応</td><td>返信案をAI生成 → 確認して送信</td></tr>
+        <tr><td>運用・対応</td><td>月次レポート</td><td>数値まとめ + 改善提案を自動生成</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== 13. リスクと対策 ===== -->
+  <div class="section page-break" id="sec13">
+    <h2 class="section-title"><span class="section-number">13</span>リスクと対策</h2>
+
+    <table>
+      <thead><tr><th>リスク</th><th>影響</th><th>対策</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>上田依存が解消できない</strong></td>
+          <td>成長が月商150万あたりで頭打ちになる</td>
+          <td>Q3のSNSディレクター採用が最重要。採用が遅れる場合はWeb制作を優先しSNSの新規獲得を抑える</td>
+        </tr>
+        <tr>
+          <td><strong>横展開が想定より遅れる</strong></td>
+          <td>SNS売上がFY2026で870万（保守的）に留まる</td>
+          <td>夜職のクライアントを着実に増やしつつ、Web制作のストック収入でカバー</td>
+        </tr>
+        <tr>
+          <td><strong>Web制作の需要が想定以下</strong></td>
+          <td>保守収入の積み上げが遅れる</td>
+          <td>事故なびメルマガで4,000院に一斉案内。反応が薄ければ価格・プラン見直し</td>
+        </tr>
+        <tr>
+          <td><strong>解約率が想定以上</strong></td>
+          <td>MRRの成長が鈍化</td>
+          <td>月次レポートの充実、定期的な価値提供で解約を防ぐ。解約理由を分析しサービス改善</td>
+        </tr>
+        <tr>
+          <td><strong>採用したディレクターが合わない</strong></td>
+          <td>コストだけかかり品質が下がる</td>
+          <td>最初3ヶ月は業務委託でお試し。合わなければ切り替え可能な契約にする</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>SNS運用固有リスク</h3>
+    <table>
+      <thead><tr><th>リスク</th><th>内容</th><th>対策</th></tr></thead>
+      <tbody>
+        <tr><td>プラットフォーム規約違反</td><td>過激表現によるアカウント停止</td><td>投稿ガイドライン策定、事前チェック体制</td></tr>
+        <tr><td>炎上</td><td>不適切投稿による信用毀損</td><td>緊急時対応フロー策定、投稿前承認ルール</td></tr>
+        <tr><td>キャスト交代</td><td>退職等でコンテンツ継続困難</td><td>店舗アカウント中心の設計、複数キャスト起用</td></tr>
+        <tr><td>クライアント都合</td><td>素材が来ない、連絡取れない</td><td>素材提出期限の明確化、契約書に記載</td></tr>
+        <tr><td>工数オーバー</td><td>想定以上に時間がかかる</td><td>バッファ込みの工数設計、早期アラート</td></tr>
+        <tr><td>成果が出ない</td><td>SNSが伸びない、集客につながらない</td><td>期待値調整、短期/中長期KPIの設定</td></tr>
+      </tbody>
+    </table>
+
+    <h3>当面の課題と対策案</h3>
+    <table>
+      <thead><tr><th>課題</th><th>対策案</th></tr></thead>
+      <tbody>
+        <tr><td>上田の商談工数が限界</td><td>① 営業代行の活用 ② 商談できるメンバーの追加 ③ オンライン商談比率を上げて工数削減</td></tr>
+        <tr><td>メンバーAのDM工数が上限</td><td>① DM送信の外注 ② 営業チームの増員</td></tr>
+        <tr><td>3月の工数が93時間オーバー</td><td>上記対策の早期実施が必要</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== 14. 次のアウトプット ===== -->
+  <div class="section page-break" id="sec14">
+    <h2 class="section-title"><span class="section-number">14</span>次のアウトプット</h2>
+    <p>本ドキュメントをベースに、実務へ落とすための制作物を作成する。</p>
+    <table>
+      <thead><tr><th>#</th><th>アウトプット</th><th>備考</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>企画カテゴリ集（参考用）</td><td>店舗独自の企画を考える起点として</td></tr>
+        <tr><td>2</td><td>DM一次対応テンプレ</td><td>予約/応募/問い合わせ用</td></tr>
+        <tr><td>3</td><td>各プランの提案説明文（1枚）</td><td>商談用</td></tr>
+        <tr><td>4</td><td>編集レギュレーション</td><td>品質統一用</td></tr>
+        <tr><td>5</td><td>営業用DMテンプレ</td><td>新規アプローチ用</td></tr>
+        <tr><td>6</td><td>商談トークスクリプト</td><td>商談の流れ・質問リスト</td></tr>
+        <tr><td>7</td><td>契約書・利用規約</td><td>法的リスク回避</td></tr>
+        <tr><td>8</td><td>クライアント向け素材提出ガイド</td><td>素材提出ルールの明確化</td></tr>
+        <tr><td>9</td><td>月次レポートテンプレ</td><td>報告の効率化</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== 15. まとめ ===== -->
+  <div class="section" id="sec15">
+    <h2 class="section-title"><span class="section-number">15</span>まとめ</h2>
+
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="label">FY2026 売上目標</div>
+        <div class="value" style="font-size: 24px;">2,077<span class="unit">万円</span></div>
+        <div class="note">標準シナリオ</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">FY2028 売上目標</div>
+        <div class="value" style="font-size: 24px;">5,500<span class="unit">万円</span></div>
+        <div class="note">標準シナリオ</div>
+      </div>
+      <div class="summary-card accent">
+        <div class="label">FY2028 月商</div>
+        <div class="value" style="font-size: 24px;">550<span class="unit">万/月</span></div>
+        <div class="note">ストック収入ベース</div>
+      </div>
+    </div>
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="label">FY2026 粗利</div>
+        <div class="value" style="font-size: 24px;">1,749<span class="unit">万円</span></div>
+        <div class="note">追加コスト328万を控除</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">FY2027 粗利</div>
+        <div class="value" style="font-size: 24px;">3,062<span class="unit">万円</span></div>
+        <div class="note">追加コスト838万を控除</div>
+      </div>
+      <div class="summary-card accent">
+        <div class="label">FY2028 粗利</div>
+        <div class="value" style="font-size: 24px;">4,255<span class="unit">万円</span></div>
+        <div class="note">追加コスト1,245万を控除</div>
+      </div>
+    </div>
+    <p class="text-sub">※粗利＝売上−追加コスト（既存人件費除く）。松本さんにて人件費を加算し最終利益を確定してください。</p>
+
+    <h3>松本さんへのお願い</h3>
+    <ol>
+      <li><strong>既存人件費の記入</strong> → 利益ラインの確定</li>
+      <li><strong>採用予算の確認</strong> → Q3のSNSディレクターを業務委託で始めてよいか</li>
+      <li><strong>事故なびネットワーク活用の承認</strong> → メルマガでWeb制作の案内を流してよいか</li>
+      <li><strong>シナリオの選択</strong> → 標準を基準に調整するか、保守的で進めるか</li>
+    </ol>
+
+    <div class="highlight-box">
+      <p><strong>このドラフトはたたき台です。</strong>松本さんのフィードバックを反映して確定版に仕上げます。</p>
+      <p>数字の根拠や前提条件で「ここはもっとこうだろう」という箇所があれば、遠慮なくご指摘ください。</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="doc-footer">
+    <p>本資料はドラフトです。松本社長との協議を経て確定版を作成します。</p>
+    <p style="margin-top: 8px;">株式会社Opus.net | 2026年2月19日作成</p>
+  </div>
+
+</div><!-- /.content -->
+</div><!-- /.layout -->
+
+<script>
+(function() {
+  var sections = document.querySelectorAll('.section[id]');
+  var links = document.querySelectorAll('.toc a');
+  function update() {
+    var cur = '';
+    for (var i = 0; i < sections.length; i++) {
+      if (sections[i].getBoundingClientRect().top <= 120) cur = sections[i].id;
+    }
+    for (var j = 0; j < links.length; j++) {
+      links[j].classList.toggle('active', links[j].getAttribute('href') === '#' + cur);
+    }
+  }
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+</script>
+
+</body>
+</html>
